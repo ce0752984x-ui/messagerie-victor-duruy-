@@ -1,0 +1,247 @@
+/* ============================================================
+   IDENTITÉ VISUELLE — MESSAGERIE CLG VICTOR DURUY
+   ============================================================
+   Palette : encre bordeaux institutionnelle + craie dorée,
+   un clin d'œil au cachet de courrier administratif et au
+   tableau noir, sans tomber dans le style "ENT" générique.
+   ============================================================ */
+
+:root {
+  /* Couleurs */
+  --encre: #2b1410;          /* bordeaux quasi-noir, texte principal */
+  --bordeaux: #7a2e2e;        /* accent principal */
+  --bordeaux-vif: #9c3b3b;    /* hover / actif */
+  --craie: #d4a843;           /* doré craie, accent secondaire */
+  --craie-clair: #e9c976;
+  --papier: #f7f3ea;          /* fond clair, "papier" */
+  --papier-fonce: #ece4d3;
+  --blanc: #fffdf8;
+  --gris-texte: #5c5249;
+  --gris-bordure: #ddd3c0;
+  --vert-succes: #3f7a4f;
+  --rouge-erreur: #a23b3b;
+
+  /* Typographie */
+  --police-titre: "Fraunces", Georgia, serif;
+  --police-corps: "Public Sans", "Segoe UI", sans-serif;
+  --police-utile: "JetBrains Mono", monospace;
+
+  /* Rayons / ombres */
+  --rayon: 10px;
+  --rayon-petit: 6px;
+  --ombre: 0 2px 10px rgba(43, 20, 16, 0.08);
+  --ombre-forte: 0 8px 30px rgba(43, 20, 16, 0.18);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--police-corps);
+  background: var(--papier);
+  color: var(--encre);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--bordeaux);
+  outline-offset: 2px;
+}
+
+/* Scrollbar discrète */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--gris-bordure); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--craie); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- Cachet / sceau (élément signature) ---------- */
+.cachet {
+  position: relative;
+  width: 1em;
+  height: 1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cachet svg { width: 100%; height: 100%; }
+
+/* ---------- Boutons partagés ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 0.7em 1.4em;
+  border-radius: var(--rayon-petit);
+  border: 1.5px solid transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-principal {
+  background: var(--bordeaux);
+  color: var(--blanc);
+}
+.btn-principal:hover { background: var(--bordeaux-vif); box-shadow: var(--ombre); }
+
+.btn-secondaire {
+  background: transparent;
+  border-color: var(--gris-bordure);
+  color: var(--encre);
+}
+.btn-secondaire:hover { border-color: var(--bordeaux); color: var(--bordeaux); }
+
+.btn-craie {
+  background: var(--craie);
+  color: var(--encre);
+}
+.btn-craie:hover { background: var(--craie-clair); }
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--rouge-erreur);
+  color: var(--rouge-erreur);
+}
+.btn-danger:hover { background: var(--rouge-erreur); color: var(--blanc); }
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-icone {
+  background: transparent;
+  border: none;
+  padding: 0.4em;
+  border-radius: 50%;
+  display: inline-flex;
+  color: var(--gris-texte);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.btn-icone:hover { background: var(--papier-fonce); color: var(--bordeaux); }
+
+/* ---------- Champs de formulaire ---------- */
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+.champ label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gris-texte);
+}
+.champ input,
+.champ select,
+.champ textarea {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.65em 0.8em;
+  border: 1.5px solid var(--gris-bordure);
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+  color: var(--encre);
+  transition: border-color 0.12s ease;
+}
+.champ input:focus,
+.champ select:focus,
+.champ textarea:focus {
+  border-color: var(--bordeaux);
+}
+.champ textarea { resize: vertical; min-height: 120px; }
+
+/* ---------- Badges de rôle ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.25em 0.65em;
+  border-radius: 100px;
+}
+.badge-admin { background: rgba(122,46,46,0.12); color: var(--bordeaux); }
+.badge-professeur { background: rgba(212,168,67,0.18); color: #8a6a1f; }
+.badge-eleve { background: rgba(63,122,79,0.12); color: var(--vert-succes); }
+.badge-desactive { background: rgba(162,59,59,0.1); color: var(--rouge-erreur); }
+
+/* ---------- Toast de notification ---------- */
+.toast-zone {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+}
+.toast {
+  background: var(--encre);
+  color: var(--blanc);
+  padding: 0.8em 1.2em;
+  border-radius: var(--rayon-petit);
+  box-shadow: var(--ombre-forte);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  animation: toast-in 0.2s ease;
+  max-width: 320px;
+}
+.toast.succes { border-left: 4px solid var(--vert-succes); }
+.toast.erreur { border-left: 4px solid var(--rouge-erreur); }
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Squelette de chargement ---------- */
+.chargement-ligne {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--papier-fonce) 25%, var(--gris-bordure) 50%, var(--papier-fonce) 75%);
+  background-size: 200% 100%;
+  animation: chargement 1.4s ease infinite;
+}
+@keyframes chargement {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---------- États vides ---------- */
+.etat-vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  padding: 4em 2em;
+  text-align: center;
+  color: var(--gris-texte);
+}
+.etat-vide svg { width: 64px; height: 64px; opacity: 0.5; margin-bottom: 0.4em; }
+.etat-vide h3 { font-family: var(--police-titre); color: var(--encre); font-size: 1.2rem; }
+.etat-vide p { font-size: 0.9rem; max-width: 320px; }
+
+/* ---------- Responsive utilitaires ---------- */
+@media (max-width: 720px) {
+  .masquer-mobile { display: none !important; }
+}

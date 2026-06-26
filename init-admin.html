@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Création du premier compte admin — CLG Victor Duruy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/identite.css" />
+<style>
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2em;
+  }
+  .carte-init {
+    background: var(--blanc);
+    border: 1px solid var(--gris-bordure);
+    border-radius: var(--rayon);
+    padding: 2.2em;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: var(--ombre);
+  }
+  .carte-init h1 {
+    font-family: var(--police-titre);
+    font-size: 1.5rem;
+    margin-bottom: 0.4em;
+  }
+  .avertissement {
+    background: rgba(212,168,67,0.15);
+    border-left: 3px solid var(--craie);
+    padding: 0.8em 1em;
+    border-radius: var(--rayon-petit);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 1.4em;
+  }
+  form { display: flex; flex-direction: column; gap: 1.1em; margin-top: 1.4em; }
+  .resultat {
+    margin-top: 1.2em;
+    padding: 1em;
+    border-radius: var(--rayon-petit);
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  .resultat.succes { background: rgba(63,122,79,0.1); color: var(--vert-succes); border-left: 3px solid var(--vert-succes); }
+  .resultat.erreur { background: rgba(162,59,59,0.08); color: var(--rouge-erreur); border-left: 3px solid var(--rouge-erreur); }
+  .suffixe-domaine { font-size: 0.82rem; color: var(--gris-texte); margin-top: 0.3em; }
+</style>
+</head>
+<body>
+
+<div class="carte-init">
+  <h1>Créer le compte administrateur</h1>
+  <div class="avertissement">
+    ⚠️ Cette page sert <strong>uniquement</strong> à créer le tout premier compte
+    admin de la plateforme. Utilise-la une seule fois, puis supprime le fichier
+    <code>init-admin.html</code> de ton dépôt (ou ne le partage à personne) :
+    n'importe qui pourrait sinon créer un compte administrateur en visitant cette page.
+  </div>
+
+  <form id="formulaire-init">
+    <div class="champ">
+      <label for="nom">Nom complet</label>
+      <input type="text" id="nom" placeholder="ex : Camille Martin" required />
+    </div>
+    <div class="champ">
+      <label for="identifiant">Identifiant</label>
+      <input type="text" id="identifiant" placeholder="ex : admin" required />
+      <div class="suffixe-domaine" id="suffixe-domaine"></div>
+    </div>
+    <div class="champ">
+      <label for="mdp">Mot de passe (6 caractères minimum)</label>
+      <input type="password" id="mdp" minlength="6" required />
+    </div>
+    <button type="submit" class="btn btn-principal" id="bouton-creer">Créer le compte admin</button>
+  </form>
+
+  <div id="resultat"></div>
+</div>
+
+<script type="module">
+  import {
+    auth, db, fabriquerEmail, DOMAINE_ETABLISSEMENT,
+    createUserWithEmailAndPassword, doc, setDoc, serverTimestamp, signOut
+  } from "./js/firebase-config.js";
+
+  document.getElementById("suffixe-domaine").textContent = "Adresse finale : identifiant@" + DOMAINE_ETABLISSEMENT;
+
+  const form = document.getElementById("formulaire-init");
+  const elResultat = document.getElementById("resultat");
+  const elBouton = document.getElementById("bouton-creer");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    elResultat.innerHTML = "";
+    elBouton.disabled = true;
+    elBouton.textContent = "Création en cours...";
+
+    const nom = document.getElementById("nom").value.trim();
+    const identifiant = document.getElementById("identifiant").value.trim();
+    const mdp = document.getElementById("mdp").value;
+    const email = fabriquerEmail(identifiant);
+
+    try {
+      const identifiants = await createUserWithEmailAndPassword(auth, email, mdp);
+      await setDoc(doc(db, "utilisateurs", identifiants.user.uid), {
+        nom,
+        email,
+        role: "admin",
+        classeOuFonction: "Administration",
+        statut: "actif",
+        creeLe: serverTimestamp(),
+        creePar: "Initialisation",
+      });
+      await signOut(auth);
+
+      elResultat.innerHTML = `
+        <div class="resultat succes">
+          ✅ Compte admin créé avec succès !<br><br>
+          <strong>Identifiant :</strong> ${email}<br>
+          <strong>Mot de passe :</strong> celui que tu as choisi<br><br>
+          Tu peux maintenant te rendre sur la <a href="index.html" style="text-decoration:underline;">page de connexion</a>.
+          N'oublie pas de supprimer ou de protéger ce fichier <code>init-admin.html</code> ensuite.
+        </div>`;
+      form.reset();
+    } catch (erreur) {
+      let texte = "Une erreur est survenue.";
+      if (erreur.code === "auth/email-already-in-use") texte = "Cet identifiant est déjà utilisé.";
+      if (erreur.code === "auth/weak-password") texte = "Le mot de passe est trop faible (6 caractères minimum).";
+      elResultat.innerHTML = `<div class="resultat erreur">❌ ${texte}</div>`;
+    } finally {
+      elBouton.disabled = false;
+      elBouton.textContent = "Créer le compte admin";
+    }
+  });
+</script>
+
+</body>
+</html>

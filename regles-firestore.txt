@@ -1,0 +1,74 @@
+// ============================================================
+// RÈGLES DE SÉCURITÉ FIRESTORE — MESSAGERIE CLG VICTOR DURUY
+// ============================================================
+// À COLLER DANS : Firebase Console > Firestore Database > Règles
+// (remplace tout le contenu existant par celui-ci, puis clique "Publier")
+// ============================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ----------------------------------------------------------
+    // Fonctions utilitaires
+    // ----------------------------------------------------------
+    function estConnecte() {
+      return request.auth != null;
+    }
+
+    function monProfil() {
+      return get(/databases/$(database)/documents/utilisateurs/$(request.auth.uid)).data;
+    }
+
+    function estAdmin() {
+      return estConnecte() && monProfil().role == 'admin';
+    }
+
+    // ----------------------------------------------------------
+    // Collection "utilisateurs" (profils : nom, rôle, classe...)
+    // ----------------------------------------------------------
+    match /utilisateurs/{uid} {
+      // Tout compte connecté peut lire les profils (nécessaire pour
+      // l'assistant destinataire et l'affichage des noms dans les messages).
+      allow read: if estConnecte();
+
+      // Seul un admin peut créer, modifier ou supprimer un profil.
+      // Exception : un utilisateur peut modifier UNIQUEMENT son propre
+      // statut "lu"/préférences ne sont pas stockés ici, donc pas d'exception nécessaire.
+      allow create: if estAdmin();
+      allow update: if estAdmin();
+      allow delete: if estAdmin();
+    }
+
+    // ----------------------------------------------------------
+    // Collection "messages"
+    // ----------------------------------------------------------
+    match /messages/{messageId} {
+      // Lecture : l'expéditeur, le destinataire, ou un admin (supervision).
+      allow read: if estConnecte() && (
+        resource.data.expediteurUid == request.auth.uid ||
+        resource.data.destinataireUid == request.auth.uid ||
+        estAdmin()
+      );
+
+      // Création : uniquement en tant qu'expéditeur soi-même.
+      allow create: if estConnecte() &&
+        request.resource.data.expediteurUid == request.auth.uid;
+
+      // Mise à jour : l'expéditeur (édition de brouillon, envoi) ou le
+      // destinataire (marquer comme lu) peuvent modifier. Un admin aussi.
+      allow update: if estConnecte() && (
+        resource.data.expediteurUid == request.auth.uid ||
+        resource.data.destinataireUid == request.auth.uid ||
+        estAdmin()
+      );
+
+      // Suppression : l'expéditeur (ses propres brouillons/envois) ou un admin.
+      allow delete: if estConnecte() && (
+        resource.data.expediteurUid == request.auth.uid ||
+        estAdmin()
+      );
+    }
+  }
+}
